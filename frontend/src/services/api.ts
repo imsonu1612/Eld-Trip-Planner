@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { TripPlanRequest, TripPlanResponse } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -17,7 +17,7 @@ export const tripPlanService = {
   },
 
   async healthCheck(): Promise<{ status: string }> {
-    const response = await api.get<{ status: string }>('/api/health/');
+    const response = await api.get<{ status: string }>('/');
     return response.data;
   },
 };
