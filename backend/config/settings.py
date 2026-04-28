@@ -114,6 +114,10 @@ else:
 
 OPENCAGE_API_KEY = os.getenv('OPENCAGE_API_KEY', '14dc157a11fc4ad3a7a66788c0d50998')
 
+# Vercel-specific settings
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
 # HOS Configuration
 ASSUMED_DRIVING_SPEED_MPH = 55
 MAX_DRIVING_HOURS = 11
