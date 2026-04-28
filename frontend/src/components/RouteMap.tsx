@@ -67,11 +67,11 @@ const FitRouteBounds: React.FC<{ coordinates: [number, number][] }> = ({ coordin
 };
 
 const RouteMap: React.FC<RouteMapProps> = ({ coordinates, stops, tripSummary }) => {
-  const [center, setCente] = useState<[number, number]>([39, -95]);
+  const [center, setCenter] = useState<[number, number]>([39, -95]);
 
   useEffect(() => {
     if (coordinates && coordinates.length > 0) {
-      setCente(coordinates[0]);
+      setCenter(coordinates[0]);
     }
   }, [coordinates]);
 
@@ -99,58 +99,70 @@ const RouteMap: React.FC<RouteMapProps> = ({ coordinates, stops, tripSummary }) 
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="premium-card interactive-lift animate-rise animate-delay-2 flex h-full flex-col overflow-hidden">
       {tripSummary && (
-        <div className="bg-[#1E3A5F] text-white p-4">
-          <div className="flex justify-between">
+        <div className="bg-gradient-to-r from-[#0f2a47] via-[#18496f] to-[#1d8a8a] p-4 text-white">
+          <div className="flex flex-wrap justify-between gap-4">
             <div>
-              <p className="text-sm opacity-80">Total Distance</p>
+              <p className="text-xs uppercase tracking-wide opacity-80">Total Distance</p>
               <p className="text-2xl font-bold">{tripSummary.total_distance_miles.toFixed(1)} miles</p>
             </div>
             <div>
-              <p className="text-sm opacity-80">Estimated Duration</p>
+              <p className="text-xs uppercase tracking-wide opacity-80">Estimated Duration</p>
               <p className="text-2xl font-bold">{tripSummary.total_duration_hours.toFixed(1)} hours</p>
             </div>
           </div>
         </div>
       )}
 
-      <MapContainer
-        center={center}
-        zoom={5}
-        style={{ height: '100%', minHeight: '400px' }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-        />
+      <div className="relative">
+        <MapContainer
+          center={center}
+          zoom={5}
+          style={{ height: '100%', minHeight: '480px' }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; OpenStreetMap contributors'
+          />
 
-        {coordinates.length > 0 && (
-          <>
-            <FitRouteBounds coordinates={coordinates} />
-            <Polyline positions={coordinates} color="#F97316" weight={4} opacity={0.9} />
-          </>
-        )}
+          {coordinates.length > 0 && (
+            <>
+              <FitRouteBounds coordinates={coordinates} />
+              <Polyline positions={coordinates} color="#f97316" weight={5} opacity={0.92} />
+            </>
+          )}
 
-        {stops.map((stop, idx) => (
-          <Marker
-            key={idx}
-            position={[stop.lat, stop.lng]}
-            icon={getMarkerIcon(stop.type)}
-          >
-            <Popup>
-              <div className="text-sm">
-                <p className="font-bold">{stop.location_name}</p>
-                <p>{stop.type}</p>
-                <p className="text-xs">
-                  {formatTime(stop.arrival_time)} - {formatTime(stop.departure_time)}
-                </p>
-                <p className="text-xs italic">{stop.notes}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+          {stops.map((stop, idx) => (
+            <Marker
+              key={idx}
+              position={[stop.lat, stop.lng]}
+              icon={getMarkerIcon(stop.type)}
+            >
+              <Popup>
+                <div className="text-sm">
+                  <p className="font-bold">{stop.location_name}</p>
+                  <p>{stop.type}</p>
+                  <p className="text-xs">
+                    {formatTime(stop.arrival_time)} - {formatTime(stop.departure_time)}
+                  </p>
+                  <p className="text-xs italic">{stop.notes}</p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-xl bg-white/88 px-3 py-2 text-xs shadow-lg backdrop-blur-sm animate-fade">
+          <p className="mb-1 font-semibold text-[#0f2a47]">Map Legend</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-600">
+            <span>Green: Pickup</span>
+            <span>Red: Dropoff</span>
+            <span>Orange: Rest/Fuel</span>
+            <span>Line: Planned Route</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

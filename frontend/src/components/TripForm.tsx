@@ -6,6 +6,12 @@ interface TripFormProps {
   loading: boolean;
 }
 
+interface Suggestion {
+  formatted: string;
+  lat: number;
+  lng: number;
+}
+
 const TripForm: React.FC<TripFormProps> = ({ onSubmit, loading }) => {
   const [formData, setFormData] = React.useState<TripPlanRequest>({
     current_location: '',
@@ -14,12 +20,45 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, loading }) => {
     current_cycle_used: 0,
   });
 
+  const [suggestions, setSuggestions] = React.useState<Record<string, Suggestion[]>>({});
+  const [activeField, setActiveField] = React.useState<string | null>(null);
+
+  const fetchSuggestions = async (query: string, fieldName: string) => {
+    if (query.length < 2) {
+      setSuggestions(prev => ({ ...prev, [fieldName]: [] }));
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.opencagedata.com/geocode/v1/json?key=14dc157a11fc4ad3a7a66788c0d50998&q=${encodeURIComponent(query)}&limit=5&no_annotations=1`
+      );
+      const data = await response.json();
+      const results = data.results?.map((r: any) => ({
+        formatted: r.formatted,
+        lat: r.geometry.lat,
+        lng: r.geometry.lng,
+      })) || [];
+      setSuggestions(prev => ({ ...prev, [fieldName]: results }));
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: name === 'current_cycle_used' ? parseFloat(value) || 0 : value,
     }));
+    setActiveField(name);
+    fetchSuggestions(value, name);
+  };
+
+  const handleSelectSuggestion = (fieldName: string, suggestion: Suggestion) => {
+    setFormData(prev => ({ ...prev, [fieldName]: suggestion.formatted }));
+    setSuggestions(prev => ({ ...prev, [fieldName]: [] }));
+    setActiveField(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,13 +69,15 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, loading }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-[#1E3A5F] mb-4">Plan Your Trip</h2>
+    <div className="premium-card interactive-lift animate-rise form-reveal p-6">
+      <p className="section-kicker">Trip Inputs</p>
+      <h2 className="section-title">Plan Your Route</h2>
+      <p className="section-subtitle mb-5">Enter freight trip details and current cycle hours.</p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-[#1E293B] mb-1">
-            📍 Current Location
+        <div className="relative">
+          <label className="mb-1 block text-sm font-semibold text-[#173553]">
+            Current Location
           </label>
           <input
             type="text"
@@ -44,14 +85,28 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, loading }) => {
             value={formData.current_location}
             onChange={handleChange}
             placeholder="e.g., Chicago, IL"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+            className="input-animate w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-[#1d8a8a] focus:ring-2 focus:ring-[#1d8a8a]/25 hover:border-slate-300"
             required
+            autoComplete="off"
           />
+          {suggestions.current_location && suggestions.current_location.length > 0 && (
+            <ul className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white shadow-lg">
+              {suggestions.current_location.map((suggestion, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleSelectSuggestion('current_location', suggestion)}
+                  className="cursor-pointer px-3 py-2 text-sm hover:bg-slate-100"
+                >
+                  {suggestion.formatted}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1E293B] mb-1">
-            📍 Pickup Location
+        <div className="relative">
+          <label className="mb-1 block text-sm font-semibold text-[#173553]">
+            Pickup Location
           </label>
           <input
             type="text"
@@ -59,14 +114,28 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, loading }) => {
             value={formData.pickup_location}
             onChange={handleChange}
             placeholder="e.g., St. Louis, MO"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+            className="input-animate w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-[#1d8a8a] focus:ring-2 focus:ring-[#1d8a8a]/25 hover:border-slate-300"
             required
+            autoComplete="off"
           />
+          {suggestions.pickup_location && suggestions.pickup_location.length > 0 && (
+            <ul className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white shadow-lg">
+              {suggestions.pickup_location.map((suggestion, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleSelectSuggestion('pickup_location', suggestion)}
+                  className="cursor-pointer px-3 py-2 text-sm hover:bg-slate-100"
+                >
+                  {suggestion.formatted}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[#1E293B] mb-1">
-            📍 Dropoff Location
+        <div className="relative">
+          <label className="mb-1 block text-sm font-semibold text-[#173553]">
+            Dropoff Location
           </label>
           <input
             type="text"
@@ -74,14 +143,28 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, loading }) => {
             value={formData.dropoff_location}
             onChange={handleChange}
             placeholder="e.g., Dallas, TX"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+            className="input-animate w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-[#1d8a8a] focus:ring-2 focus:ring-[#1d8a8a]/25 hover:border-slate-300"
             required
+            autoComplete="off"
           />
+          {suggestions.dropoff_location && suggestions.dropoff_location.length > 0 && (
+            <ul className="absolute z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white shadow-lg">
+              {suggestions.dropoff_location.map((suggestion, index) => (
+                <li
+                  key={index}
+                  onClick={() => handleSelectSuggestion('dropoff_location', suggestion)}
+                  className="cursor-pointer px-3 py-2 text-sm hover:bg-slate-100"
+                >
+                  {suggestion.formatted}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#1E293B] mb-1">
-            🕐 Current Cycle Used (Hours)
+          <label className="mb-1 block text-sm font-semibold text-[#173553]">
+            Current Cycle Used (Hours)
           </label>
           <input
             type="number"
@@ -90,18 +173,21 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, loading }) => {
             onChange={handleChange}
             min="0"
             max="70"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316]"
+            className="input-animate w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-[#1d8a8a] focus:ring-2 focus:ring-[#1d8a8a]/25 hover:border-slate-300"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">Hours already used in current 70-hour cycle (0-70)</p>
+          <p className="mt-1 text-xs text-slate-500">Hours already used in current 70-hour cycle (0-70)</p>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[#F97316] hover:bg-[#ea580c] disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-md transition"
+          className={`button-press btn-animate w-full rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] px-4 py-2.5 font-bold text-white shadow-lg shadow-orange-200 hover:brightness-105 disabled:cursor-not-allowed disabled:grayscale ${loading ? 'loading-glow' : ''}`}
         >
-          {loading ? 'Calculating your route and HOS schedule...' : 'Plan My Trip'}
+          <span className="relative z-10 inline-flex items-center gap-2">
+            {loading && <span className="spinner" aria-hidden="true"></span>}
+            <span>{loading ? 'Calculating your route and HOS schedule...' : 'Plan My Trip'}</span>
+          </span>
         </button>
       </form>
     </div>

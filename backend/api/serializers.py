@@ -50,9 +50,9 @@ class DailyLogSerializer(serializers.Serializer):
 
 
 class TripPlanRequestSerializer(serializers.Serializer):
-    current_location = serializers.CharField(required=True)
-    pickup_location = serializers.CharField(required=True)
-    dropoff_location = serializers.CharField(required=True)
+    current_location = serializers.CharField(required=True, allow_blank=False, allow_null=False)
+    pickup_location = serializers.CharField(required=True, allow_blank=False, allow_null=False)
+    dropoff_location = serializers.CharField(required=True, allow_blank=False, allow_null=False)
     current_cycle_used = serializers.FloatField(required=True, min_value=0, max_value=70)
 
 

@@ -1,0 +1,27 @@
+.section-kicker {
+	font-size: 0.72rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #1d8a8a;
+	font-weight: 700;
+}
+
+.section-title {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: #0f2a47;
+	margin-top: 0.25rem;
+}
+
+.section-subtitle {
+	font-size: 0.9rem;
+	color: #4b5d70;
+	margin-top: 0.25rem;
+}
+
+.premium-card {
+	border-radius: 1rem;
+	background: rgba(255, 255, 255, 0.86);
+	border: 1px solid rgba(255, 255, 255, 0.75);
+	box-shadow: 0 15px 34px rgba(12, 31, 48, 0.11);
+}

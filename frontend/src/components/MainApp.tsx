@@ -32,24 +32,32 @@ const MainApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <header className="bg-[#1E3A5F] text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <h1 className="text-4xl font-bold">ELD Trip Planner</h1>
-          <p className="text-sm opacity-90 mt-2">
+    <div className="relative min-h-screen overflow-hidden pb-10">
+      <div className="pointer-events-none absolute -left-20 top-16 h-80 w-80 rounded-full bg-cyan-300/30 blur-3xl animate-float"></div>
+      <div className="pointer-events-none absolute -right-24 top-20 h-96 w-96 rounded-full bg-orange-300/30 blur-3xl animate-float"></div>
+
+      <header className="relative z-10 px-4 pt-5 md:px-6">
+        <div className="mx-auto max-w-7xl rounded-2xl bg-gradient-to-r from-[#0f2a47] via-[#18496f] to-[#1d8a8a] px-6 py-7 text-white shadow-2xl animate-rise animate-scale-in">
+          <div className="mb-3 flex flex-wrap gap-2">
+            <span className="brand-chip">FMCSA Compliant</span>
+            <span className="brand-chip">Live Routing</span>
+            <span className="brand-chip">ELD Canvas Logs</span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight md:text-5xl">ELD Trip Planner</h1>
+          <p className="mt-2 text-sm opacity-90 md:text-base">
             FMCSA Hours of Service Compliant Route Planning
           </p>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex gap-8">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:px-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
           {/* Left Panel */}
-          <div className="w-96 flex-shrink-0">
+          <div className="space-y-6 lg:sticky lg:top-5 lg:h-fit animate-rise animate-delay-1">
             <TripForm onSubmit={handleTripSubmit} loading={loading} />
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
+              <div className="premium-card border-red-200 bg-red-50 px-4 py-3 text-red-800">
                 <p className="font-semibold">Error</p>
                 <p className="text-sm">{error}</p>
               </div>
@@ -68,7 +76,7 @@ const MainApp: React.FC = () => {
           </div>
 
           {/* Right Panel */}
-          <div className="flex-grow flex flex-col">
+          <div className="flex min-h-[420px] flex-col animate-rise animate-delay-2">
             {tripData ? (
               <RouteMap
                 coordinates={tripData.route_coordinates}
@@ -76,8 +84,8 @@ const MainApp: React.FC = () => {
                 tripSummary={tripData.trip_summary}
               />
             ) : (
-              <div className="bg-white rounded-lg shadow-md p-12 flex items-center justify-center h-96">
-                <p className="text-gray-500 text-center">
+              <div className="premium-card flex h-[420px] items-center justify-center p-12 text-center">
+                <p className="max-w-md text-gray-600">
                   Enter your trip details on the left to see the route map
                 </p>
               </div>
@@ -87,8 +95,10 @@ const MainApp: React.FC = () => {
 
         {/* ELD Log Sheets */}
         {tripData && tripData.daily_logs.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-[#1E3A5F] mb-6">ELD Daily Log Sheets</h2>
+          <div className="mt-12 animate-rise animate-delay-3">
+            <p className="section-kicker">Compliance Logs</p>
+            <h2 className="section-title mb-1">ELD Daily Log Sheets</h2>
+            <p className="section-subtitle mb-6">Rendered from your schedule with downloadable PNG exports.</p>
             <div className="overflow-x-auto pb-4">
               <div className="flex gap-6">
                 {tripData.daily_logs.map((log, idx) => (

@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from datetime import datetime, timedelta
 import logging
 
@@ -38,6 +40,7 @@ def _place_stops_on_route(stops, route_coordinates):
         stops[stop_index].lng = stop_coord[1]
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class TripPlanView(APIView):
     """
     POST /api/trip/plan/
@@ -47,9 +50,15 @@ class TripPlanView(APIView):
     
     def post(self, request):
         # Validate request
+        logger.info(f"=== REQUEST RECEIVED ===")
+        logger.info(f"Request data: {request.data}")
+        logger.info(f"Request content type: {request.content_type}")
+        
         serializer = TripPlanRequestSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            logger.error(f"=== VALIDATION FAILED ===")
+            logger.error(f"Validation errors: {serializer.errors}")
+            return Response({'error': 'Validation failed', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         
         current_location = serializer.validated_data['current_location']
         pickup_location = serializer.validated_data['pickup_location']
@@ -59,7 +68,12 @@ class TripPlanView(APIView):
         try:
             # Step 1: Geocode all locations
             logger.info(f"Geocoding locations: {current_location}, {pickup_location}, {dropoff_location}")
-            geo_results = geocode_multiple_locations(current_location, pickup_location, dropoff_location)
+            geo_results = geocode_multiple_locations(
+                current_location, 
+                pickup_location, 
+                dropoff_location,
+                api_key=settings.OPENCAGE_API_KEY
+            )
             
             current_geo = geo_results.get(current_location)
             pickup_geo = geo_results.get(pickup_location)

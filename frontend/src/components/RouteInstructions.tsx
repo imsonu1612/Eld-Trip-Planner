@@ -6,19 +6,33 @@ interface RouteInstructionsProps {
 
 const RouteInstructions: React.FC<RouteInstructionsProps> = ({ instructions }) => {
   const normalized = instructions.filter((item) => item && item.trim().length > 0);
+  let stepNumber = 0;
 
   if (normalized.length === 0) {
     return null;
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-      <h3 className="text-lg font-bold text-[#1E3A5F] mb-4">Route Instructions</h3>
-      <ol className="list-decimal ml-5 space-y-2 text-sm text-gray-700 max-h-72 overflow-y-auto pr-2">
+    <div className="premium-card interactive-lift animate-rise animate-delay-3 p-6">
+      <p className="section-kicker">Navigation</p>
+      <h3 className="section-title mb-4">Route Instructions</h3>
+      <ol className="ml-1 max-h-72 space-y-2 overflow-y-auto pr-2 text-sm text-gray-700">
         {normalized.map((instruction, index) => (
-          <li key={`${index}-${instruction.slice(0, 30)}`} className="leading-5">
-            {instruction}
-          </li>
+          instruction.endsWith(':') ? (
+            <li key={`${index}-${instruction.slice(0, 30)}`} className="animate-fade pt-2 text-xs font-bold uppercase tracking-wide text-[#1d8a8a]" style={{ animationDelay: `${index * 35}ms` }}>
+              {instruction}
+            </li>
+          ) : (
+            (() => {
+              stepNumber += 1;
+              return (
+            <li key={`${index}-${instruction.slice(0, 30)}`} className="animate-fade flex gap-2 rounded-lg border border-slate-200/80 bg-white/70 px-3 py-2 leading-5" style={{ animationDelay: `${index * 35}ms` }}>
+              <span className="mt-0.5 text-xs font-bold text-[#ea580c]">{stepNumber}.</span>
+              <span>{instruction}</span>
+            </li>
+              );
+            })()
+          )
         ))}
       </ol>
     </div>

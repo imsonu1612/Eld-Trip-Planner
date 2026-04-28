@@ -39,6 +39,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Disable CSRF for API endpoints
+CSRF_exempt_classes = ['rest_framework.views.APIView']
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -100,6 +103,7 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+CORS_ALLOW_ALL_ORIGINS = True
 
 # API Keys
 _openroute_key = os.getenv('OPENROUTE_API_KEY', '').strip()
@@ -107,6 +111,8 @@ if _openroute_key.lower() in {'', 'your-openroute-api-key'}:
     OPENROUTE_API_KEY = ''
 else:
     OPENROUTE_API_KEY = _openroute_key
+
+OPENCAGE_API_KEY = os.getenv('OPENCAGE_API_KEY', '14dc157a11fc4ad3a7a66788c0d50998')
 
 # HOS Configuration
 ASSUMED_DRIVING_SPEED_MPH = 55

@@ -5,12 +5,65 @@ Route and geocoding services using external APIs
 import requests
 from typing import List, Tuple, Dict, Optional
 import logging
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
+class OpenCageGeocoder:
+    """Geocoding using OpenCage API (more accurate than Nominatim)"""
+    
+    BASE_URL = "https://api.opencagedata.com/geocode/v1/json"
+    
+    @staticmethod
+    def geocode(location: str, api_key: str) -> Optional[Dict]:
+        """
+        Geocode a location string to lat/lng using OpenCage
+        Returns: {'lat': float, 'lng': float, 'name': str} or None
+        """
+        try:
+            params = {
+                'q': location,
+                'key': api_key,
+                'limit': 1,
+                'no_annotations': 1
+            }
+            
+            response = requests.get(OpenCageGeocoder.BASE_URL, params=params, timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            if data.get('results') and len(data['results']) > 0:
+                result = data['results'][0]
+                geometry = result.get('geometry', {})
+                components = result.get('components', {})
+                
+                # Build a clean location name
+                city = components.get('city') or components.get('town') or components.get('village') or ''
+                state = components.get('state') or components.get('county') or ''
+                country = components.get('country', '')
+                
+                if city and state:
+                    formatted_name = f"{city}, {state}"
+                elif city:
+                    formatted_name = city
+                else:
+                    formatted_name = result.get('formatted', location)
+                
+                return {
+                    'lat': float(geometry.get('lat')),
+                    'lng': float(geometry.get('lng')),
+                    'name': formatted_name
+                }
+            return None
+        
+        except Exception as e:
+            logger.error(f"OpenCage geocoding error for {location}: {str(e)}")
+            return None
+
+
 class NominatimGeocoder:
-    """Geocoding using OpenStreetMap Nominatim (free, no API key)"""
+    """Geocoding using OpenStreetMap Nominatim (free, no API key) - Fallback"""
     
     BASE_URL = "https://nominatim.openstreetmap.org/search"
     
@@ -193,9 +246,24 @@ def get_live_route(
     return OSRMRouter.get_route(start_lat, start_lng, end_lat, end_lng)
 
 
-def geocode_multiple_locations(*locations: str) -> Dict[str, Optional[Dict]]:
-    """Geocode multiple locations"""
+def geocode_multiple_locations(*locations: str, api_key: str = None) -> Dict[str, Optional[Dict]]:
+    """Geocode multiple locations using OpenCage (with Nominatim fallback)"""
     results = {}
-    for location in locations:
-        results[location] = NominatimGeocoder.geocode(location)
+    
+    # Use OpenCage if API key is provided
+    if api_key:
+        for location in locations:
+            result = OpenCageGeocoder.geocode(location, api_key)
+            if result:
+                results[location] = result
+                logger.info(f"OpenCage geocoded '{location}' to {result['lat']}, {result['lng']}")
+            else:
+                # Fallback to Nominatim if OpenCage fails
+                logger.warning(f"OpenCage failed for '{location}', trying Nominatim")
+                results[location] = NominatimGeocoder.geocode(location)
+    else:
+        # Use Nominatim if no API key
+        for location in locations:
+            results[location] = NominatimGeocoder.geocode(location)
+    
     return results

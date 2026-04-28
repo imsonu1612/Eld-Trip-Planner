@@ -37,40 +37,46 @@ const StopsTimeline: React.FC<StopsTimelineProps> = ({ stops, tripSummary }) => 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="premium-card interactive-lift animate-rise animate-delay-2 p-6">
       {tripSummary && (
-        <div className="mb-6 pb-6 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-[#1E3A5F] mb-3">Trip Summary</h3>
+        <div className="mb-6 border-b border-slate-200 pb-6">
+          <p className="section-kicker">Trip Snapshot</p>
+          <h3 className="section-title mb-3">Trip Summary</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-gray-600">Total Distance</p>
-              <p className="text-lg font-semibold text-[#F97316]">{tripSummary.total_distance_miles.toFixed(1)} miles</p>
+              <p className="text-slate-500">Total Distance</p>
+              <p className="text-lg font-semibold text-[#ea580c]">{tripSummary.total_distance_miles.toFixed(1)} miles</p>
             </div>
             <div>
-              <p className="text-gray-600">Estimated Duration</p>
-              <p className="text-lg font-semibold text-[#F97316]">{tripSummary.total_duration_hours.toFixed(1)} hours</p>
+              <p className="text-slate-500">Estimated Duration</p>
+              <p className="text-lg font-semibold text-[#ea580c]">{tripSummary.total_duration_hours.toFixed(1)} hours</p>
             </div>
             <div>
-              <p className="text-gray-600">Start Time</p>
-              <p className="text-sm font-mono">{formatTime(tripSummary.estimated_start)}</p>
+              <p className="text-slate-500">Start Time</p>
+              <p className="text-sm font-mono text-[#1a3c5b]">{formatTime(tripSummary.estimated_start)}</p>
             </div>
             <div>
-              <p className="text-gray-600">End Time</p>
-              <p className="text-sm font-mono">{formatTime(tripSummary.estimated_end)}</p>
+              <p className="text-slate-500">End Time</p>
+              <p className="text-sm font-mono text-[#1a3c5b]">{formatTime(tripSummary.estimated_end)}</p>
             </div>
           </div>
         </div>
       )}
 
-      <h3 className="text-lg font-bold text-[#1E3A5F] mb-4">Stops & Events</h3>
+      <p className="section-kicker">Schedule Events</p>
+      <h3 className="section-title mb-4">Stops & Events</h3>
       <div className="space-y-4">
         {stops.map((stop, idx) => (
-          <div key={idx} className="flex items-start space-x-4">
-            <div className={`w-4 h-4 rounded-full ${getStopColor(stop.type)} mt-1 flex-shrink-0`}></div>
+          <div
+            key={idx}
+            className="flex items-start space-x-4 rounded-xl border border-slate-200/80 bg-white/70 p-3 animate-fade"
+            style={{ animationDelay: `${idx * 70}ms` }}
+          >
+            <div className={`mt-1 h-4 w-4 flex-shrink-0 rounded-full ${getStopColor(stop.type)} ring-4 ring-white`}></div>
             <div className="flex-grow">
               <div className="font-semibold text-[#1E293B]">{stop.location_name}</div>
-              <div className="text-sm text-gray-600">
-                <p>{stop.type.charAt(0).toUpperCase() + stop.type.slice(1)}</p>
+              <div className="text-sm text-slate-600">
+                <p className="font-medium text-[#1a3c5b]">{stop.type.charAt(0).toUpperCase() + stop.type.slice(1)}</p>
                 <p className="text-xs">
                   {formatTime(stop.arrival_time)} - {formatTime(stop.departure_time)} ({stop.duration_minutes} min)
                 </p>

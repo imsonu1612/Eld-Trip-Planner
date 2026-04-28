@@ -25,22 +25,22 @@ const ELDLogSheet: React.FC<ELDLogSheetProps> = ({ dailyLog }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 min-w-[850px]">
+    <div className="premium-card interactive-lift animate-rise min-w-[850px] p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <div className="bg-[#F97316] text-white px-3 py-1 rounded font-bold">
+          <div className="rounded bg-gradient-to-r from-[#f97316] to-[#ea580c] px-3 py-1 font-bold text-white shadow-sm">
             Day {dailyLog.day_number}
           </div>
-          <span className="text-sm text-gray-600">{dailyLog.date}</span>
+          <span className="text-sm text-slate-600">{dailyLog.date}</span>
         </div>
         <button
           onClick={handleDownloadPNG}
-          className="bg-[#1E3A5F] hover:bg-[#152a47] text-white px-4 py-2 rounded text-sm font-semibold"
+          className="button-press rounded-lg bg-[#0f2a47] px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-[#18496f]"
         >
           Download PNG
         </button>
       </div>
-      <canvas ref={canvasRef} className="border border-gray-300 rounded w-full"></canvas>
+      <canvas ref={canvasRef} className="w-full rounded border border-slate-300 bg-white"></canvas>
     </div>
   );
 };

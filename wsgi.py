@@ -1,12 +1,12 @@
 """
-WSGI config for ELD Trip Planner
+WSGI entry point for Vercel deployment
 """
 
 import os
 import sys
 
 # Add the backend directory to Python path
-backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+backend_dir = os.path.join(os.path.dirname(__file__), 'backend')
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
