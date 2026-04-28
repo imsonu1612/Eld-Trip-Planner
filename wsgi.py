@@ -7,13 +7,11 @@ import sys
 
 # Add the backend directory to Python path
 backend_dir = os.path.join(os.path.dirname(__file__), 'backend')
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+sys.path.insert(0, backend_dir)
 
-# Also add the parent directory to ensure config is found
-parent_dir = os.path.dirname(backend_dir)
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+# For Vercel, also add common paths
+sys.path.insert(0, '/var/task')
+sys.path.insert(0, '/var/task/backend')
 
 from django.core.wsgi import get_wsgi_application
 

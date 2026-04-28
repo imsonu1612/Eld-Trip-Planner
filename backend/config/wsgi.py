@@ -11,14 +11,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 # Get the backend directory (parent of config)
 backend_dir = os.path.dirname(current_dir)
 
-# Add backend directory to Python path so 'config' can be imported
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+# Ensure backend directory is in Python path (this is where 'config' module is)
+sys.path.insert(0, backend_dir)
 
-# Also add the project root for good measure
-project_root = os.path.dirname(backend_dir)
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+# For Vercel deployment, add additional paths
+if '/var/task' in os.getcwd():
+    sys.path.insert(0, '/var/task')
+    sys.path.insert(0, '/var/task/backend')
 
 from django.core.wsgi import get_wsgi_application
 

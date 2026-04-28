@@ -1,7 +1,7 @@
 {
   "builds": [
     {
-      "src": "backend/config/wsgi.py",
+      "src": "wsgi.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb"
@@ -10,8 +10,16 @@
   ],
   "routes": [
     {
+      "src": "/favicon.ico",
+      "status": 404
+    },
+    {
+      "src": "/favicon.png",
+      "status": 404
+    },
+    {
       "src": "/(.*)",
-      "dest": "backend/config/wsgi.py"
+      "dest": "wsgi.py"
     }
   ]
 }
